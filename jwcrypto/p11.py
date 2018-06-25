@@ -1,16 +1,19 @@
 import pkcs11
-from pkcs11 import KeyType,ObjectClass,Mechanism
+from pkcs11 import ObjectClass, Attribute, Mechanism
 
-def sign_data(data, lib_module, slot, token_label, pin):
-	lib = pkcs11.lib(lib_module)
+def sign_p11(sigin, alg, lib_path, slot, key_label, pin):
+	lib = pkcs11.lib(lib_path)
 	slot = lib.get_slots()[slot]
 	token = slot.get_token()
-	if str(token) != token_label:
-		raise Exception('No such token with this label')
 	with token.open(user_pin=pin) as session:
-		priv = session.get_key(key_type=KeyType.RSA,
-				object_class=ObjectClass.PRIVATE_KEY)
-
-		digest = session.digest(data,mechanism=Mechanism.SHA256)
-		signature = priv.sign(digest)
-		return signature	
+		for priv in session.get_objects({Attribute.CLASS: ObjectClass.PRIVATE_KEY, Attribute.LABEL: key_label}):
+			if alg == 'RS256':
+				MECHANISM = Mechanism.SHA256_RSA_PKCS
+			elif alg == 'RS384':
+				MECHANISM = Mechanism.SHA384_RSA_PKCS
+			elif alg == 'RS512':
+				MECHANISM = Mechanism.SHA512_RSA_PKCS
+			else:
+				raise Exception('Unsupported algorithm')
+			signature = priv.sign(sigin, mechanism=MECHANISM)		
+	return signature

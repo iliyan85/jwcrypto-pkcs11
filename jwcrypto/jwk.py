@@ -742,11 +742,11 @@ class JWK(object):
         return obj
 
     @classmethod
-    def use_pkcs11(cls, lib_module, slot, token_label, pin='1234'):
+    def use_pkcs11(cls, lib_path, slot, key_label, pin='1234'):
         obj = cls()
-        obj._pkcs11 = {'lib_module': lib_module,
+        obj._pkcs11 = {'lib_path': lib_path,
                        'slot': slot,
-                       'token_label': token_label,
+                       'key_label': key_label,
                        'pin': pin}
         return obj
 

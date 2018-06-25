@@ -6,7 +6,7 @@ from jwcrypto.common import json_decode, json_encode
 from jwcrypto.jwa import JWA
 from jwcrypto.jwk import JWK
 
-from jwcrypto.p11 import sign_data
+from jwcrypto.p11 import sign_p11
 
 
 # RFC 7515 - 9.1
@@ -133,14 +133,13 @@ class JWSCore(object):
         """Generates a signature"""
         sigin = ('.'.join([self.protected, self.payload])).encode('utf-8')
         if self.key._pkcs11 != {}:
-            lib_module = self.key._pkcs11['lib_module']
+            lib_path = self.key._pkcs11['lib_path']
             slot = self.key._pkcs11['slot']
-            token_label = self.key._pkcs11['token_label']
+            key_label = self.key._pkcs11['key_label']
             pin = self.key._pkcs11['pin']
-            signature = sign_data(sigin, lib_module, slot, token_label, pin)
+            signature = sign_p11(sigin, self.alg, lib_path, slot, key_label, pin)
         else:
             signature = self.engine.sign(self.key, sigin)
-        #signature = sign_data(sigin)
         return {'protected': self.protected,
                 'payload': self.payload,
                 'signature': base64url_encode(signature)}
