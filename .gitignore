@@ -6,3 +6,6 @@ cscope.out
 .tox
 .coverage
 *.egg-info
+.project/
+.pydevproject/
+.settings/org.eclipse.core.resources.prefs/
